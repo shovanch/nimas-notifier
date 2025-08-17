@@ -9,7 +9,13 @@ jobs:
   run:
     runs-on: ubuntu-latest
     env:
-      SCRAPER_BACKEND: ${{ vars.SCRAPER_BACKEND }} # set to "api" for fastest runs
+      SCRAPER_BACKEND: ${{ secrets.SCRAPER_BACKEND }}
+      TARGET_URL: ${{ secrets.TARGET_URL }}
+      NIMAS_API_URL: ${{ secrets.NIMAS_API_URL }}
+      ROW_MATCH: ${{ secrets.ROW_MATCH }}
+      THRESHOLD: ${{ secrets.THRESHOLD }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
@@ -17,13 +23,21 @@ jobs:
       - name: Install deps (creates venv)
         run: uv sync --all-extras
 
-      - name: Run
-        env:
-          TARGET_URL: ${{ secrets.TARGET_URL }}
-          NIMAS_API_URL: ${{ secrets.NIMAS_API_URL }}
-          ROW_MATCH: ${{ secrets.ROW_MATCH }}
-          THRESHOLD: ${{ secrets.THRESHOLD }}
-          SCRAPER_BACKEND: ${{ secrets.SCRAPER_BACKEND }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        # Only cache/install Playwright when explicitly requested
+      - name: Cache Playwright browsers
+        if: ${{ env.SCRAPER_BACKEND == 'playwright' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright
+        if: ${{ env.SCRAPER_BACKEND == 'playwright' }}
+        run: |
+          uv pip install -e ".[playwright]"
+          uv run playwright install --with-deps chromium
+
+      - name: Run watcher
         run: uv run python -m app.main
