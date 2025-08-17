@@ -12,21 +12,12 @@ jobs:
       SCRAPER_BACKEND: ${{ vars.SCRAPER_BACKEND }} # set to "api" for fastest runs
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v4
+      - name: Install deps (creates venv)
+        run: uv sync --all-extras
 
-      - name: Install base deps
-        run: uv pip install -e .
-
-      # Only install Playwright when needed (backend != api)
-      - name: Install Playwright deps (optional)
-        if: env.SCRAPER_BACKEND != 'api'
-        run: |
-          uv pip install -e ".[playwright]"
-          uv run playwright install --with-deps chromium
-
-      - name: Run watcher
+      - name: Run
         env:
           TARGET_URL: ${{ vars.TARGET_URL }}
           NIMAS_API_URL: ${{ vars.NIMAS_API_URL }}

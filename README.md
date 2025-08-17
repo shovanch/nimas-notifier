@@ -1,4 +1,4 @@
-# website-notifier
+# NIMAS Notifier
 
 A small tool to watch a web page for availability numbers and notify you via Telegram when they fall below a threshold.
 Currently configured for NIMAS.
