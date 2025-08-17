@@ -35,9 +35,8 @@ Set these in the repo:
 
 - **Variables** (Settings → Secrets and variables → Actions → Variables)
   - `TARGET_URL` (default points to NIMAS page)
-  - `ROW_MATCH` (e.g., `BMC-58`)
+  - `ROW_MATCH` (e.g., `AMC-69`)
   - `THRESHOLD` (e.g., `15`)
-  - `USER_AGENT` (optional)
 
 ---
 
@@ -46,9 +45,6 @@ Set these in the repo:
 Clone and set up:
 
 ```bash
-git clone https://github.com/you/website-notifier.git
-cd website-notifier
-
 # Install Python deps (creates/uses .venv automatically)
 uv pip install -e .
 
