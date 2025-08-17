@@ -19,11 +19,11 @@ jobs:
 
       - name: Run
         env:
-          TARGET_URL: ${{ vars.TARGET_URL }}
-          NIMAS_API_URL: ${{ vars.NIMAS_API_URL }}
-          ROW_MATCH: ${{ vars.ROW_MATCH }}
-          THRESHOLD: ${{ vars.THRESHOLD }}
-          SCRAPER_BACKEND: ${{ vars.SCRAPER_BACKEND }}
+          TARGET_URL: ${{ secrets.TARGET_URL }}
+          NIMAS_API_URL: ${{ secrets.NIMAS_API_URL }}
+          ROW_MATCH: ${{ secrets.ROW_MATCH }}
+          THRESHOLD: ${{ secrets.THRESHOLD }}
+          SCRAPER_BACKEND: ${{ secrets.SCRAPER_BACKEND }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: uv run python -m app.main
