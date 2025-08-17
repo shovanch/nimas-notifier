@@ -1,32 +1,36 @@
 from __future__ import annotations
 import os
 from dotenv import load_dotenv
-from app.browser_scraper import get_availability_via_browser
+
+from app.scrape import get_availability
 from app.notifier import send_telegram
 
 load_dotenv()
 
-def getenv(key: str, default: str | None = None) -> str:
-    v = os.getenv(key, default)
-    if v is None or v == "":
+def getenv_required(key: str) -> str:
+    v = os.getenv(key)
+    if not v:
         raise RuntimeError(f"Missing required env var: {key}")
     return v
 
 def main() -> int:
-    url        = os.getenv("TARGET_URL", "https://nimasdirang.com/Mountaineering-courses")
-    row_match  = os.getenv("ROW_MATCH", "BMC-58")
-    threshold  = int(os.getenv("THRESHOLD", "15"))
-    bot_token  = getenv("TELEGRAM_BOT_TOKEN")
-    chat_id    = getenv("TELEGRAM_CHAT_ID")
+    page_url  = os.getenv("TARGET_URL")
+    api_url   = os.getenv("NIMAS_API_URL")
+    serial_no = os.getenv("ROW_MATCH")
+    threshold = int(os.getenv("THRESHOLD"))
+    backend   = os.getenv("SCRAPER_BACKEND", "auto")  # api | playwright | auto
 
-    value = get_availability_via_browser(url, row_match)
+    bot_token = getenv_required("TELEGRAM_BOT_TOKEN")
+    chat_id   = getenv_required("TELEGRAM_CHAT_ID")
 
-    print(f"{row_match} @ {url} → {value} (threshold {threshold})")
+    value = get_availability(page_url, api_url, serial_no, backend)
+    print(f"{serial_no} → {value} (threshold {threshold}) via {backend}")
+
     if value < threshold:
         send_telegram(
             bot_token,
             chat_id,
-            f"⚠️ {row_match} availability is {value} (< {threshold}).\n{url}"
+            f"⚠️ {serial_no} availability is {value} (< {threshold}).\n{page_url}"
         )
     return 0
 

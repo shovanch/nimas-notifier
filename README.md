@@ -1,7 +1,7 @@
 # website-notifier
 
 A small tool to watch a web page for availability numbers and notify you via Telegram when they fall below a threshold.
-Currently configured for NIMAS mountaineering course seats.
+Currently configured for NIMAS.
 
 ---
 

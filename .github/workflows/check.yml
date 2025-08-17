@@ -2,29 +2,37 @@ name: availability-check
 
 on:
   schedule:
-    - cron: "17 3 * * *" # daily at 03:17 UTC; change as needed
+    - cron: "0 19 * * *" # Run daily at 19:00 UTC (00:30 IST)
   workflow_dispatch: {}
 
 jobs:
   run:
     runs-on: ubuntu-latest
+    env:
+      SCRAPER_BACKEND: ${{ vars.SCRAPER_BACKEND }} # set to "api" for fastest runs
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v4
 
-      - name: Install
+      - name: Install base deps
+        run: uv pip install -e .
+
+      # Only install Playwright when needed (backend != api)
+      - name: Install Playwright deps (optional)
+        if: env.SCRAPER_BACKEND != 'api'
         run: |
-          uv pip install -e .
+          uv pip install -e ".[playwright]"
+          uv run playwright install --with-deps chromium
 
       - name: Run watcher
         env:
           TARGET_URL: ${{ vars.TARGET_URL }}
+          NIMAS_API_URL: ${{ vars.NIMAS_API_URL }}
           ROW_MATCH: ${{ vars.ROW_MATCH }}
           THRESHOLD: ${{ vars.THRESHOLD }}
+          SCRAPER_BACKEND: ${{ vars.SCRAPER_BACKEND }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          USER_AGENT: ${{ vars.USER_AGENT }}
-        run: |
-          python -m app.main
+        run: uv run python -m app.main
