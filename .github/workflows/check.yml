@@ -25,7 +25,7 @@ jobs:
 
         # Only cache/install Playwright when explicitly requested
       - name: Cache Playwright browsers
-        if: ${{ env.SCRAPER_BACKEND == 'playwright' }}
+        if: ${{ env.SCRAPER_BACKEND != 'api' }}
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
@@ -34,7 +34,7 @@ jobs:
             playwright-${{ runner.os }}-
 
       - name: Install Playwright
-        if: ${{ env.SCRAPER_BACKEND == 'playwright' }}
+        if: ${{ env.SCRAPER_BACKEND != 'api' }}
         run: |
           uv pip install -e ".[playwright]"
           uv run playwright install --with-deps chromium

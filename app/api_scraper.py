@@ -41,26 +41,13 @@ def get_availability_via_api(
             "pgSize": 200,
             "templateID": 3,
             "filters": {"Category Name": "Mountaineering"},
+            "isDownload": False,
+            "NumberOfFieldsView": 50,
+
         }
         data = _post(client, api_url, p1)
         records = _extract_records(data)
 
-        # Attempt 2: wrapped payload if needed
-        if not records:
-            p2 = {
-                "inputData": {
-                    "index": 1,
-                    "pgSize": 200,
-                    "isDownload": False,
-                    "userID": 0,
-                    "parentID": 40330,
-                    "numberOfFieldsView": 50,
-                    "filters": {"Category Name": "Mountaineering"},
-                    "templateID": 3,
-                }
-            }
-            data = _post(client, api_url, p2)
-            records = _extract_records(data)
 
         if not records:
             raise RuntimeError("API returned no records; payload/endpoint may have changed.")
