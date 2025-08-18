@@ -1,3 +1,5 @@
+"""Main entry point for the NIMAS notifier application."""
+
 from __future__ import annotations
 import os
 from dotenv import load_dotenv
@@ -8,12 +10,28 @@ from app.notifier import send_telegram
 load_dotenv()
 
 def getenv_required(key: str) -> str:
+    """Get a required environment variable or raise an error if missing.
+    
+    Args:
+        key: The environment variable name to retrieve.
+        
+    Returns:
+        The environment variable value.
+        
+    Raises:
+        RuntimeError: If the environment variable is not set or empty.
+    """
     v = os.getenv(key)
     if not v:
         raise RuntimeError(f"Missing required env var: {key}")
     return v
 
 def main() -> int:
+    """Main function that checks availability and sends notifications.
+    
+    Returns:
+        Exit code (0 for success).
+    """
     page_url  = os.getenv("TARGET_URL")
     api_url   = os.getenv("NIMAS_API_URL")
     serial_no = os.getenv("ROW_MATCH")

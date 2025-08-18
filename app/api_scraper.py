@@ -1,14 +1,33 @@
+"""JSON API scraping module for NIMAS data."""
+
 from __future__ import annotations
 import httpx
 from typing import Any
 
 def _value_of(record: list[dict[str, Any]], key: str) -> Any:
+    """Extract value from a record list by key name.
+    
+    Args:
+        record: List of name-value dictionaries.
+        key: The key name to search for.
+        
+    Returns:
+        The value associated with the key, or None if not found.
+    """
     for item in record:
         if item.get("name") == key:
             return item.get("value")
     return None
 
 def _extract_records(data: dict) -> list:
+    """Extract records from API response data.
+    
+    Args:
+        data: The API response dictionary.
+        
+    Returns:
+        List of record arrays from the response.
+    """
     # Expected shape: {"response":{"records":[ [ {name,value},... ], ... ]}}
     resp = data.get("response") or {}
     recs = resp.get("records")
@@ -17,6 +36,19 @@ def _extract_records(data: dict) -> list:
     return []
 
 def _post(client: httpx.Client, api_url: str, payload: dict) -> dict:
+    """Make a POST request and return JSON response.
+    
+    Args:
+        client: The HTTP client to use.
+        api_url: The API endpoint URL.
+        payload: The JSON payload to send.
+        
+    Returns:
+        The parsed JSON response.
+        
+    Raises:
+        httpx.HTTPStatusError: If the request fails.
+    """
     r = client.post(api_url, json=payload, follow_redirects=True)
     r.raise_for_status()
     return r.json()
@@ -26,12 +58,22 @@ def get_availability_via_api(
     api_url: str,
     timeout: float = 20.0,
 ) -> int:
-    """
-    Call the JSON endpoint and return the 'Available Seats' for the row
-    whose 'Serial No' equals `serial_no` (e.g. 'BMC-58').
-
-    Tries both a minimal payload and the wrapped 'inputData' payload,
-    because the backend sometimes requires one or the other.
+    """Get availability data via JSON API endpoint.
+    
+    Calls the JSON endpoint and returns the 'Available Seats' for the row
+    whose 'Serial No' equals the provided serial number.
+    
+    Args:
+        serial_no: The serial number to look up (e.g. 'BMC-58').
+        api_url: The API endpoint URL.
+        timeout: Request timeout in seconds.
+        
+    Returns:
+        The number of available seats.
+        
+    Raises:
+        RuntimeError: If API returns no records.
+        ValueError: If serial number not found or availability is non-integer.
     """
     headers = {"Content-Type": "application/json"}
     with httpx.Client(timeout=timeout, headers=headers) as client:

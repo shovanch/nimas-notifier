@@ -1,3 +1,5 @@
+"""Playwright-based web scraping module."""
+
 from __future__ import annotations
 import re
 from playwright.sync_api import sync_playwright
@@ -7,9 +9,22 @@ def get_availability_via_playwright(
     serial_no: str,
     timeout_ms: int = 30000,
 ) -> int:
-    """
-    Render the page, find the row where first cell == `serial_no`,
-    return the integer in the 'Availability' column.
+    """Scrape availability data using headless browser automation.
+    
+    Renders the page, finds the row where the first cell matches the serial number,
+    and returns the integer value from the 'Availability' column.
+    
+    Args:
+        page_url: The web page URL to scrape.
+        serial_no: The serial number to search for in the first column.
+        timeout_ms: Page load and element wait timeout in milliseconds.
+        
+    Returns:
+        The availability number from the matching row.
+        
+    Raises:
+        ValueError: If the serial number is not found or availability cell
+                   doesn't contain a valid integer.
     """
     target = serial_no.strip().lower()
 
